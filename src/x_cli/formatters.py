@@ -135,6 +135,17 @@ def _md_tweet(tweet: dict, includes: dict, title: str = "", verbose: bool = Fals
             print(f"*{created}*")
     print(f"\n{text}\n")
 
+    article = tweet.get("article")
+    if article:
+        art_title = article.get("title", "")
+        art_body = article.get("plain_text", "")
+        if art_title:
+            print(f"### 📰 {art_title}\n")
+        if art_body:
+            preview = art_body[:500] + ("…" if len(art_body) > 500 else "")
+            print(f"{preview}\n")
+            print(f"*({len(art_body):,} chars total)*\n")
+
     if verbose:
         metrics = tweet.get("public_metrics", {})
         if metrics:
@@ -261,6 +272,17 @@ def _human_tweet(tweet: dict, includes: dict, title: str = "", verbose: bool = F
         created = tweet.get("created_at", "")
         content += f"  [dim]{created}[/dim]"
     content += f"\n\n{text}"
+
+    article = tweet.get("article")
+    if article:
+        art_title = article.get("title", "")
+        art_body = article.get("plain_text", "")
+        if art_title:
+            content += f"\n\n[bold]📰 Article: {art_title}[/bold]"
+        if art_body:
+            preview = art_body[:500] + ("…" if len(art_body) > 500 else "")
+            content += f"\n\n{preview}"
+            content += f"\n\n[dim]({len(art_body):,} chars total)[/dim]"
 
     if verbose:
         metrics = tweet.get("public_metrics", {})

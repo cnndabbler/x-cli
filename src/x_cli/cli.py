@@ -127,6 +127,32 @@ def tweet_metrics(state, id_or_url):
     state.output(data, f"Metrics {tid}")
 
 
+@tweet.command("article")
+@click.argument("id_or_url")
+@pass_state
+def tweet_article(state, id_or_url):
+    """Extract full article text from a tweet.
+
+    Outputs just the article title + plain_text content.
+    Useful for piping article content to other tools.
+    """
+    tid = parse_tweet_id(id_or_url)
+    data = state.client.get_tweet(tid)
+    tweet_data = data.get("data", {})
+    article = tweet_data.get("article")
+    if not article:
+        raise click.ClickException(f"Tweet {tid} does not contain an article.")
+    if state.mode == "json":
+        import json
+        print(json.dumps(article, indent=2, ensure_ascii=False))
+    else:
+        title = article.get("title", "")
+        body = article.get("plain_text", "")
+        if title:
+            print(f"# {title}\n")
+        print(body)
+
+
 # ============================================================
 # user
 # ============================================================
@@ -245,6 +271,16 @@ def like(state, id_or_url):
     state.output(data, "Liked")
 
 
+@cli.command("unlike")
+@click.argument("id_or_url")
+@pass_state
+def unlike(state, id_or_url):
+    """Unlike a tweet."""
+    tid = parse_tweet_id(id_or_url)
+    data = state.client.unlike_tweet(tid)
+    state.output(data, "Unliked")
+
+
 @cli.command("retweet")
 @click.argument("id_or_url")
 @pass_state
@@ -253,6 +289,16 @@ def retweet(state, id_or_url):
     tid = parse_tweet_id(id_or_url)
     data = state.client.retweet(tid)
     state.output(data, "Retweeted")
+
+
+@cli.command("unretweet")
+@click.argument("id_or_url")
+@pass_state
+def unretweet(state, id_or_url):
+    """Undo a retweet."""
+    tid = parse_tweet_id(id_or_url)
+    data = state.client.unretweet(tid)
+    state.output(data, "Unretweeted")
 
 
 # ============================================================

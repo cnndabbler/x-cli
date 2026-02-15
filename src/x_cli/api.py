@@ -84,7 +84,7 @@ class XApiClient:
 
     def get_tweet(self, tweet_id: str) -> dict[str, Any]:
         params = {
-            "tweet.fields": "created_at,public_metrics,author_id,conversation_id,in_reply_to_user_id,referenced_tweets,attachments,entities,lang,note_tweet",
+            "tweet.fields": "created_at,public_metrics,author_id,conversation_id,in_reply_to_user_id,referenced_tweets,attachments,entities,lang,note_tweet,article",
             "expansions": "author_id,referenced_tweets.id,attachments.media_keys",
             "user.fields": "name,username,verified,profile_image_url,public_metrics",
             "media.fields": "url,preview_image_url,type,width,height,alt_text",
@@ -181,9 +181,17 @@ class XApiClient:
         user_id = self.get_authenticated_user_id()
         return self._oauth_request("POST", f"{API_BASE}/users/{user_id}/likes", {"tweet_id": tweet_id})
 
+    def unlike_tweet(self, tweet_id: str) -> dict[str, Any]:
+        user_id = self.get_authenticated_user_id()
+        return self._oauth_request("DELETE", f"{API_BASE}/users/{user_id}/likes/{tweet_id}")
+
     def retweet(self, tweet_id: str) -> dict[str, Any]:
         user_id = self.get_authenticated_user_id()
         return self._oauth_request("POST", f"{API_BASE}/users/{user_id}/retweets", {"tweet_id": tweet_id})
+
+    def unretweet(self, tweet_id: str) -> dict[str, Any]:
+        user_id = self.get_authenticated_user_id()
+        return self._oauth_request("DELETE", f"{API_BASE}/users/{user_id}/retweets/{tweet_id}")
 
     # ---- bookmarks (OAuth 1.0a -- basic tier may not support these) ----
 
