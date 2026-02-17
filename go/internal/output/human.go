@@ -57,9 +57,34 @@ func OutputHuman(data any, title string, verbose bool) {
 func humanSingle(item, includes map[string]any, title string, verbose bool) {
 	if _, ok := item["username"]; ok {
 		humanUser(item, verbose)
+	} else if isActionResponse(item) {
+		humanAction(item, title)
 	} else {
 		humanTweet(item, includes, title, verbose)
 	}
+}
+
+// isActionResponse returns true for simple API responses like {"liked": true}.
+func isActionResponse(m map[string]any) bool {
+	if _, hasID := m["id"]; hasID {
+		return false
+	}
+	if _, hasText := m["text"]; hasText {
+		return false
+	}
+	return true
+}
+
+func humanAction(item map[string]any, title string) {
+	green := color.New(color.FgGreen)
+	if title != "" {
+		green.Printf("%s: ", title)
+	}
+	var parts []string
+	for k, v := range item {
+		parts = append(parts, fmt.Sprintf("%s=%v", k, v))
+	}
+	fmt.Println(strings.Join(parts, ", "))
 }
 
 func humanTweet(tweet, includes map[string]any, title string, verbose bool) {

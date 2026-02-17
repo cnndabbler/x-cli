@@ -45,9 +45,28 @@ func OutputMarkdown(data any, title string, verbose bool) {
 func mdSingle(item, includes map[string]any, title string, verbose bool) {
 	if _, ok := item["username"]; ok {
 		mdUser(item, verbose)
+	} else if isSimpleResponse(item) {
+		mdAction(item, title)
 	} else {
 		mdTweet(item, includes, title, verbose)
 	}
+}
+
+func isSimpleResponse(m map[string]any) bool {
+	_, hasID := m["id"]
+	_, hasText := m["text"]
+	return !hasID && !hasText
+}
+
+func mdAction(item map[string]any, title string) {
+	if title != "" {
+		fmt.Printf("**%s**: ", title)
+	}
+	var parts []string
+	for k, v := range item {
+		parts = append(parts, fmt.Sprintf("%s=%v", k, v))
+	}
+	fmt.Println(strings.Join(parts, ", "))
 }
 
 func mdTweet(tweet, includes map[string]any, title string, verbose bool) {
