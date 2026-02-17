@@ -119,7 +119,7 @@ func humanTweet(tweet, includes map[string]any, title string, verbose bool) {
 			for k, v := range metrics {
 				label := strings.ReplaceAll(k, "_count", "")
 				label = strings.ReplaceAll(label, "_", " ")
-				parts = append(parts, fmt.Sprintf("%s: %v", label, v))
+				parts = append(parts, fmt.Sprintf("%s: %s", label, formatMetricValue(v)))
 			}
 			fmt.Println()
 			dim.Printf(" %s\n", strings.Join(parts, " | "))
@@ -162,7 +162,7 @@ func humanUser(user map[string]any, verbose bool) {
 		for k, v := range metrics {
 			label := strings.ReplaceAll(k, "_count", "")
 			label = strings.ReplaceAll(label, "_", " ")
-			parts = append(parts, fmt.Sprintf("%s: %v", label, v))
+			parts = append(parts, fmt.Sprintf("%s: %s", label, formatMetricValue(v)))
 		}
 		fmt.Println()
 		fmt.Printf(" %s\n", strings.Join(parts, " | "))
@@ -213,7 +213,7 @@ func humanUserTable(users []any, title string, verbose bool) {
 		followers := "0"
 		if metrics != nil {
 			if fc, ok := metrics["followers_count"]; ok {
-				followers = fmt.Sprintf("%v", fc)
+				followers = formatMetricValue(fc)
 			}
 		}
 		d, _ := user["description"].(string)

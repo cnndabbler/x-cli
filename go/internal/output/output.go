@@ -24,3 +24,18 @@ func Error(msg string, code int) {
 	fmt.Fprintf(os.Stderr, "Error: %s\n", msg)
 	os.Exit(code)
 }
+
+// formatMetricValue formats a JSON number (float64) as an integer string,
+// avoiding scientific notation for large numbers.
+func formatMetricValue(v any) string {
+	switch n := v.(type) {
+	case float64:
+		return fmt.Sprintf("%d", int64(n))
+	case int:
+		return fmt.Sprintf("%d", n)
+	case int64:
+		return fmt.Sprintf("%d", n)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}

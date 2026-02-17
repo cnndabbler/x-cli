@@ -94,7 +94,7 @@ func mdTweet(tweet, includes map[string]any, title string, verbose bool) {
 			var parts []string
 			for k, v := range metrics {
 				label := strings.ReplaceAll(k, "_count", "")
-				parts = append(parts, fmt.Sprintf("%s: %v", label, v))
+				parts = append(parts, fmt.Sprintf("%s: %s", label, formatMetricValue(v)))
 			}
 			fmt.Println(strings.Join(parts, " | "))
 			fmt.Println()
@@ -117,7 +117,7 @@ func mdUser(user map[string]any, verbose bool) {
 		var parts []string
 		for k, v := range metrics {
 			label := strings.ReplaceAll(k, "_count", "")
-			parts = append(parts, fmt.Sprintf("**%s**: %v", label, v))
+			parts = append(parts, fmt.Sprintf("**%s**: %s", label, formatMetricValue(v)))
 		}
 		fmt.Println(strings.Join(parts, " | "))
 		fmt.Println()
@@ -178,7 +178,7 @@ func mdUserTable(users []any, verbose bool) {
 		followers := "0"
 		if metrics != nil {
 			if fc, ok := metrics["followers_count"]; ok {
-				followers = fmt.Sprintf("%v", fc)
+				followers = formatMetricValue(fc)
 			}
 		}
 		if verbose {
