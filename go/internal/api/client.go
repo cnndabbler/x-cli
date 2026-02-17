@@ -98,24 +98,38 @@ func (c *Client) doRequest(req *http.Request) (map[string]any, error) {
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		errors, _ := data["errors"].([]any)
-		var msgs []string
-		for _, e := range errors {
-			em, _ := e.(map[string]any)
-			if d, ok := em["detail"].(string); ok && d != "" {
-				msgs = append(msgs, d)
-			} else if m, ok := em["message"].(string); ok && m != "" {
-				msgs = append(msgs, m)
-			}
+		return nil, extractAPIError(data, bodyBytes, resp.StatusCode)
+	}
+
+	// X API sometimes returns 200 with errors and no data
+	if _, hasErrors := data["errors"]; hasErrors {
+		if _, hasData := data["data"]; !hasData {
+			return nil, extractAPIError(data, bodyBytes, resp.StatusCode)
 		}
-		msg := strings.Join(msgs, "; ")
-		if msg == "" {
-			msg = string(bodyBytes[:min(len(bodyBytes), 500)])
-		}
-		return nil, fmt.Errorf("API error (HTTP %d): %s", resp.StatusCode, msg)
 	}
 
 	return data, nil
+}
+
+func extractAPIError(data map[string]any, bodyBytes []byte, statusCode int) error {
+	errors, _ := data["errors"].([]any)
+	var msgs []string
+	for _, e := range errors {
+		em, _ := e.(map[string]any)
+		if d, ok := em["detail"].(string); ok && d != "" {
+			msgs = append(msgs, d)
+		} else if m, ok := em["message"].(string); ok && m != "" {
+			msgs = append(msgs, m)
+		}
+	}
+	msg := strings.Join(msgs, "; ")
+	if msg == "" {
+		msg = string(bodyBytes[:min(len(bodyBytes), 500)])
+	}
+	if statusCode == 0 || statusCode == 200 {
+		return fmt.Errorf("API error: %s", msg)
+	}
+	return fmt.Errorf("API error (HTTP %d): %s", statusCode, msg)
 }
 
 // GetAuthenticatedUserID returns the authenticated user's ID (cached).
